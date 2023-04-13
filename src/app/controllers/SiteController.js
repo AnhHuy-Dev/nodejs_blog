@@ -1,14 +1,15 @@
 const Course = require('../models/Course');
 class SiteController {
     //GET /
-    index(req, res) {
+    index(req, res, next) {
         Course.find({})
-            .then((courses) => {
-                res.json(courses);
-            })
-            .catch((err) => {
-                res.status(400).json({ error: 'ERROR..!!!' });
-            });
+            .lean() //fix error not render array object handlebars
+            .then((courses) =>
+                res.render('home', {
+                    courses,
+                }),
+            )
+            .catch(next);
         // res.render("home");
     }
 
