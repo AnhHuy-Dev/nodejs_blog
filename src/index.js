@@ -27,6 +27,12 @@ app.engine(
         extname: '.hbs', //Change .handlebars -> .hbs
         helpers: {
             sum: (a, b) => a + b,
+            getPage: (n, block) => {
+                //loop in handlebar not use #each
+                var accum = '';
+                for (var i = 0; i < n; ++i) accum += block.fn(i);
+                return accum;
+            },
         },
     }),
 );

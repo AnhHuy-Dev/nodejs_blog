@@ -1,28 +1,30 @@
 <div class="container mt-4">
-    <h2>Khóa học của tôi</h2>
+    <h2 class="mb-4">Khóa học của tôi</h2>
     <table class="table">
         <thead>
             <tr>
-                <th scope="col">STT</th>
                 <th scope="col">Tên khóa học</th>
                 <th scope="col">Mô tả khóa học</th>
                 <th scope="col" colspan="2">Thời gian tạo</th>
             </tr>
         </thead>
         <tbody>
-            {{#each courses}}
+            {{#each currentCourses}}
                 <tr>
-                    <th scope="row">{{sum @index 1}}</th>
                     <td>{{this.name}}</td>
                     <td>{{this.title}}</td>
                     <td>{{this.createdAt}}</td>
                     <td>
                         <a href="/courses/{{this._id}}/edit" class="btn btn-link">Sửa</a>
-                        <a href="" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#exampleModal">Xóa</a>
+                        <a href="" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-id="{{this._id}}">Xóa</a>
                     </td>
                 </tr>
-                
-<!-- Modal -->
+            {{/each}}
+        </tbody>
+</table>
+</div>
+
+{{!-- MODAL --}}
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -34,13 +36,83 @@
         Bạn có chắc muốn xóa khóa học này không ?
       </div>
       <div class="modal-footer">
+        <button type="button" class="btn btn-danger delete-btn">Xóa</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-        <a href="/courses/{{this._id}}/delete" class="btn btn-danger">Xóa</a>
       </div>
     </div>
   </div>
 </div>
-            {{/each}}
-        </tbody>
-</table>
-</div>
+
+{{!-- Form Delete --}}
+<form method="POST" id="form-delete"></form>
+
+{{!-- Pagination --}}
+<nav aria-label="Page navigation example">
+    <div class="d-flex justify-content-center">
+        <ul class="pagination">
+          <li class="page-item">
+            <a class="page-link previous" href="" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          {{#getPage countPage}}
+              <li class="page-item"><a class="page-link number" href="">{{sum this 1}}</a></li>
+          {{/getPage}}
+            <a class="page-link next" href="" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+      </ul>
+    </div>
+</nav>
+<script>
+
+    //Handle DeleteCourse
+    const exampleModal = document.getElementById('exampleModal')
+    const deleteBtn = document.querySelector(".delete-btn")
+    const formDelete = document.getElementById("form-delete")
+    var courseId
+
+    if (exampleModal) { 
+        exampleModal.addEventListener('show.bs.modal', event => {
+        const button = event.relatedTarget
+        courseId = button.getAttribute('data-bs-id')
+    })
+
+    deleteBtn.addEventListener('click', function() {
+        formDelete.setAttribute("action", `/courses/${courseId}?_method=DELETE`)
+        formDelete.submit()
+    })
+
+
+    const pageLinkNumber = document.querySelectorAll(".page-link.number")
+    const previousBtn = document.querySelector(".previous")
+    const nextBtn = document.querySelector(".next")
+    let currentPage
+    //PREIVOUSE BTN
+    previousBtn.addEventListener('click' , function() {
+      if({{page}} == 1)
+        return
+      currentPage = {{page}}  - 1
+      previousBtn.setAttribute("href", `/me/stored/courses?page=${currentPage}`)
+    })
+    //NETX BTN
+    nextBtn.addEventListener('click' , function() {
+      if({{page}} == {{countPage}})
+        return
+      currentPage = {{page}}  + 1
+      nextBtn.setAttribute("href", `/me/stored/courses?page=${currentPage}`)
+    })
+
+    pageLinkNumber.forEach(item => {
+      item.addEventListener('click', function(){
+        item.setAttribute("href", `/me/stored/courses?page=${item.innerText}`)
+      })
+    })
+
+     pageLinkNumber.forEach(item => {
+      if(item.innerText == {{page}})
+          item.closest(".page-item").classList.add("active")
+     })
+}
+</script>
