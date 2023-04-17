@@ -22,6 +22,23 @@ class CourseController {
         formData.image = `https://img.youtube.com/vi/${req.body.videoId}/sddefault.jpg`;
         Course.create(formData).then(() => res.redirect('/'));
     }
+
+    //GET /courses/:id/edit
+    edit(req, res, next) {
+        req.params.id;
+        Course.findOne({ _id: req.params.id })
+            .lean()
+            .then((course) => res.render('courses/edit', { course }))
+            .catch(next);
+    }
+
+    //PUT /courses/:id
+    update(req, res, next) {
+        Course.updateOne({ _id: req.params.id }, req.body)
+            .lean()
+            .then(() => res.redirect('/me/stored/courses'))
+            .catch(next);
+    }
 }
 
 module.exports = new CourseController();
