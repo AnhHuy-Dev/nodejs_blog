@@ -9,10 +9,27 @@ class MeController {
             .lean()
             .then((courses) => {
                 const currentCourses = courses.slice(page * 5 - 5, page * 5);
+                const cntPage = courses.length / 5;
                 return res.render('me/stored-courses', {
                     currentCourses,
                     page,
-                    countPage: parseInt(courses.length / 5, 10) + 1,
+                    countPage: cntPage,
+                });
+            })
+            .catch(next);
+    }
+
+    trashCourses(req, res, next) {
+        const page = req.query.page;
+        Course.findDeleted({})
+            .lean()
+            .then((courses) => {
+                const currentCourses = courses.slice(page * 5 - 5, page * 5);
+                const cntPage = courses.length / 5;
+                return res.render('me/trash-courses', {
+                    currentCourses,
+                    page,
+                    countPage: cntPage,
                 });
             })
             .catch(next);

@@ -1,8 +1,12 @@
-h1 {
-  color: green; }
-
 .container {
   padding: 0 100px; }
 
 .avatar {
   width: 50px; }
+
+a {
+  text-decoration: none; }
+
+.trash {
+  color: black;
+  font-size: 20px; }

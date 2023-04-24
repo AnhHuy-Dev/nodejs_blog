@@ -1,9 +1,5 @@
 @import 'variables';
 
-h1 {
-    color: $color-red;
-}
-
 .container {
     padding: 0 100px;
     // display: flex;
@@ -11,4 +7,13 @@ h1 {
 
 .avatar {
     width: 50px;
+}
+
+a {
+    text-decoration: none;
+}
+
+.trash {
+    color: black;
+    font-size: 20px;
 }

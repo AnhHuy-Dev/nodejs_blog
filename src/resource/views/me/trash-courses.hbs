@@ -1,12 +1,12 @@
 <div class="container mt-4">
     <div class="mb-4">
-      <h2>Khóa học của tôi</h2>
-      <a href="/me/trash/courses?page=1" class="trash d-block mt-4">
-        Thùng rác
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="40px" height="40px" viewBox="0 0 24 24" stroke-width="1" stroke="black" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+      <a href="/me/stored/courses?page=1" class="fs-5 d-flex mb-4">
+        <svg class="mx-2" xmlns="http://www.w3.org/2000/svg" width="30px" height="30px" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
         </svg>
+        Danh sách khóa học
       </a>
+      <h2>Khóa học đã xóa gần đây</h2>
     </div>
     <table class="table">
         <thead>
@@ -23,16 +23,15 @@
                     <td>{{this.title}}</td>
                     <td>{{this.createdAt}}</td>
                     <td>
-                        <a href="/courses/{{this._id}}/edit" class="btn btn-link">Sửa</a>
-                        <a href="" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-id="{{this._id}}">Xóa</a>
+                        <a href="" class="btn btn-link btn-restore" data-bs-id="{{this._id}}">Khôi phục</a>
+                        <a href="" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-id="{{this._id}}">Xóa vĩnh viễn</a>
                     </td>
                 </tr>
             {{/each}}
         </tbody>
     </table>
     {{#unless currentCourses}}
-            <p style="text-align: center;">Bạn chưa đăng ký khóa học nào!
-              <a class="" href="/courses/create">Thêm khóa học</a>
+            <p style="text-align: center;">Thùng rác trống
             </p>
     {{/unless}}
 </div>
@@ -57,7 +56,8 @@
 </div>
 
 {{!-- Form Delete --}}
-<form method="POST" id="form-delete"></form>
+<form method="POST" id="form-delete-submit"></form>
+<form method="POST" id="form-restore-submit"></form>
 
 {{!-- Pagination --}}
 <nav aria-label="Page navigation example">
@@ -85,21 +85,38 @@
     //Handle DeleteCourse
     const exampleModal = document.getElementById('exampleModal')
     const deleteBtn = document.querySelector(".delete-btn")
-    const formDelete = document.getElementById("form-delete")
+    const formDelete = document.getElementById("form-delete-submit")
+    const formRestore = document.getElementById("form-restore-submit")
+    const restoreBtn = document.querySelectorAll(".btn-restore")
     var courseId
-
+  
     if (exampleModal) { 
         exampleModal.addEventListener('show.bs.modal', event => {
         const button = event.relatedTarget
         courseId = button.getAttribute('data-bs-id')
+        deleteBtn.setAttribute("disabled", "true")
+        setTimeout(() => {
+          deleteBtn.removeAttribute("disabled")
+        }, 3000)
     })
-
+    
     deleteBtn.addEventListener('click', function() {
-        formDelete.setAttribute("action", `/courses/${courseId}?_method=DELETE`)
+        formDelete.setAttribute("action", `/courses/${courseId}/force?_method=DELETE`)
         formDelete.submit()
     })
+    
+    //Handle Restore
+    restoreBtn.forEach(item => {
+        item.addEventListener("click", function(e) {
+            e.preventDefault()
+            courseId = item.getAttribute("data-bs-id")
+            console.log(courseId)
+            formRestore.setAttribute("action", `/courses/${courseId}/restore?_method=PATCH`)
+            formRestore.submit()
+        })
+    })
 
-
+    //Handle PAGINATION
     const pageLinkNumber = document.querySelectorAll(".page-link.number")
     const previousBtn = document.querySelector(".previous")
     const nextBtn = document.querySelector(".next")
@@ -109,19 +126,19 @@
       if({{page}} == 1)
         return
       currentPage = {{page}}  - 1
-      previousBtn.setAttribute("href", `/me/stored/courses?page=${currentPage}`)
+      previousBtn.setAttribute("href", `/me/trash/courses?page=${currentPage}`)
     })
     //NETX BTN
     nextBtn.addEventListener('click' , function() {
       if({{page}} == {{countPage}})
         return
       currentPage = {{page}}  + 1
-      nextBtn.setAttribute("href", `/me/stored/courses?page=${currentPage}`)
+      nextBtn.setAttribute("href", `/me/trash/courses?page=${currentPage}`)
     })
 
     pageLinkNumber.forEach(item => {
       item.addEventListener('click', function(){
-        item.setAttribute("href", `/me/stored/courses?page=${item.innerText}`)
+        item.setAttribute("href", `/me/trash/courses?page=${item.innerText}`)
       })
     })
 
