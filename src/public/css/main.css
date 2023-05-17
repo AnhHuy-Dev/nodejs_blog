@@ -10,3 +10,9 @@ a {
 .trash {
   color: black;
   font-size: 20px; }
+
+.select-option-actions {
+  width: 220px; }
+
+td {
+  vertical-align: middle; }

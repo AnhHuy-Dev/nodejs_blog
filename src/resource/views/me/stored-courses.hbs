@@ -1,17 +1,31 @@
-<div class="container mt-4">
+<form class="container mt-4" name="" method="POST" action="/courses/handle-form-action">
     <div class="mb-4">
       <h2>Khóa học của tôi</h2>
       <a href="/me/trash/courses?page=1" class="trash d-block mt-4">
-        Thùng rác
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="40px" height="40px" viewBox="0 0 24 24" stroke-width="1" stroke="black" class="w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-        </svg>
+            Thùng rác ({{countDeleted}})
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" width="40px" height="40px" viewBox="0 0 24 24" stroke-width="1" stroke="black" class="w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+            </svg>
       </a>
+      <div class="mt-4 d-flex align-items-center">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" value="" id="checkbox-all">
+          <label class="form-check-label" for="checkbox-all">
+            Chọn tất cả
+          </label>
+        </div>
+        <select class="form-select select-option-actions mx-4" aria-label="Default select example" name="action" required>
+            <option value="">-- Chọn hành động --</option>
+            <option value="delete">Xóa</option>
+          </select>
+
+          <button class="btn btn-primary disabled btn-submit-check-all">Thực hiện</button>
+      </div>
     </div>
     <table class="table">
         <thead>
             <tr>
-                <th scope="col">Tên khóa học</th>
+                <th scope="col" colspan="2">Tên khóa học</th>
                 <th scope="col">Mô tả khóa học</th>
                 <th scope="col" colspan="2">Thời gian tạo</th>
             </tr>
@@ -19,13 +33,18 @@
         <tbody>
             {{#each currentCourses}}
                 <tr>
-                    <td>{{this.name}}</td>
-                    <td>{{this.title}}</td>
-                    <td>{{this.createdAt}}</td>
-                    <td>
-                        <a href="/courses/{{this._id}}/edit" class="btn btn-link">Sửa</a>
-                        <a href="" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-id="{{this._id}}">Xóa</a>
-                    </td>
+                  <td>
+                    <div class="form-check">
+                      <input class="form-check-input " type="checkbox" name="courseIds[]" value="{{this._id}}">
+                    </div>
+                  </td>
+                  <td>{{this.name}} {{page}}</td>
+                  <td>{{this.title}}</td>
+                  <td>{{this.createdAt}}</td>
+                  <td>
+                    <a href="/courses/{{this._id}}/edit" class="btn btn-link">Sửa</a>
+                    <a href="" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-id="{{this._id}}">Xóa</a>
+                  </td>
                 </tr>
             {{/each}}
         </tbody>
@@ -35,7 +54,7 @@
               <a class="" href="/courses/create">Thêm khóa học</a>
             </p>
     {{/unless}}
-</div>
+</form>
 
 {{!-- MODAL --}}
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -99,7 +118,7 @@
         formDelete.submit()
     })
 
-
+    //HANDLLE PAGINATION
     const pageLinkNumber = document.querySelectorAll(".page-link.number")
     const previousBtn = document.querySelector(".previous")
     const nextBtn = document.querySelector(".next")
@@ -129,5 +148,38 @@
       if(item.innerText == {{page}})
           item.closest(".page-item").classList.add("active")
      })
+
+
+     //HANDLE CHECKBOX COUNT COURSE
+     const checkboxAll = document.getElementById("checkbox-all")
+     const checkAllBtn = document.querySelector(".btn-submit-check-all")
+     const courseItemCheckbox = document.querySelectorAll("input[name='courseIds[]']")
+     //Check/uncheck all checkbox
+     checkboxAll.onchange = function(e) {
+      var isCheckedAll = e.target.checked
+      courseItemCheckbox.forEach(item => 
+        item.checked = isCheckedAll 
+      )
+      renderCheckAllSubmitBtn()
+     }
+
+     //Course Item checkbox change
+     courseItemCheckbox.forEach(item => {
+      item.addEventListener("change", function(e) {
+        var isCheckedAll = courseItemCheckbox.length === document.querySelectorAll("input[name='courseIds[]']:checked").length
+
+        checkboxAll.checked = isCheckedAll
+        renderCheckAllSubmitBtn()
+      })
+     })
+
+     //Re-render check all submit button
+     function renderCheckAllSubmitBtn(){
+        const checkedCount = document.querySelectorAll("input[name='courseIds[]']:checked").length
+        if(checkedCount > 0)
+          checkAllBtn.classList.remove("disabled")
+        else
+          checkAllBtn.classList.add("disabled")
+     }
 }
 </script>

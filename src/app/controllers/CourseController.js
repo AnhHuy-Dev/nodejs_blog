@@ -61,6 +61,39 @@ class CourseController {
             .then(() => res.redirect('back'))
             .catch(next);
     }
+
+    //[action] /courses/handle-form-action
+    handleFormAction(req, res, next) {
+        switch (req.body.action) {
+            case 'delete':
+                Course.delete({ _id: { $in: req.body.courseIds } })
+                    .then(() => res.redirect('back'))
+                    .catch(next);
+                break;
+            default:
+                res.send(res.json({ message: 'Error' }));
+                break;
+        }
+    }
+
+    //[action] /courses/handle-trash-form-action
+    handleTrashFormAction(req, res, next) {
+        switch (req.body.action) {
+            case 'delete':
+                Course.deleteMany({ _id: { $in: req.body.courseIds } })
+                    .then(() => res.redirect('back'))
+                    .catch(next);
+                break;
+            case 'restore':
+                Course.restore({ _id: { $in: req.body.courseIds } })
+                    .then(() => res.redirect('back'))
+                    .catch(next);
+                break;
+            default:
+                res.send(res.json({ message: 'Error' }));
+                break;
+        }
+    }
 }
 
 module.exports = new CourseController();

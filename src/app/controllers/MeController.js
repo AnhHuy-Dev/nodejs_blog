@@ -5,18 +5,18 @@ class MeController {
     //GET /me/stored/courses
     storedCourses(req, res, next) {
         const page = req.query.page;
-        Course.find({})
-            .lean()
-            .then((courses) => {
+        Promise.all([Course.find({}).lean(), Course.countDocumentsDeleted()])
+            .then(([courses, countDeleted]) => {
                 const currentCourses = courses.slice(page * 5 - 5, page * 5);
                 const cntPage = courses.length / 5;
                 return res.render('me/stored-courses', {
                     currentCourses,
                     page,
                     countPage: cntPage,
+                    countDeleted,
                 });
             })
-            .catch(next);
+            .catch();
     }
 
     trashCourses(req, res, next) {

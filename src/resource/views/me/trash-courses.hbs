@@ -1,4 +1,4 @@
-<div class="container mt-4">
+<form class="container mt-4" method="POST" action="/courses/handle-trash-form-action">
     <div class="mb-4">
       <a href="/me/stored/courses?page=1" class="fs-5 d-flex mb-4">
         <svg class="mx-2" xmlns="http://www.w3.org/2000/svg" width="30px" height="30px" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -7,21 +7,41 @@
         Danh sách khóa học
       </a>
       <h2>Khóa học đã xóa gần đây</h2>
+      <div class="mt-4 d-flex align-items-center">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" value="" id="checkbox-all">
+          <label class="form-check-label" for="checkbox-all">
+            Chọn tất cả
+          </label>
+        </div>
+        <select class="form-select select-option-actions mx-4" aria-label="Default select example" name="action" required>
+            <option value="">-- Chọn hành động --</option>
+            <option value="delete">Xóa</option>
+            <option value="restore">Khôi phục</option>
+          </select>
+
+          <button class="btn btn-primary disabled btn-submit-check-all">Thực hiện</button>
+      </div>
     </div>
     <table class="table">
         <thead>
             <tr>
-                <th scope="col">Tên khóa học</th>
+                <th scope="col" colspan="2">Tên khóa học</th>
                 <th scope="col">Mô tả khóa học</th>
-                <th scope="col" colspan="2">Thời gian tạo</th>
+                <th scope="col" colspan="2">Thời gian xóa</th>
             </tr>
         </thead>
         <tbody>
             {{#each currentCourses}}
                 <tr>
+                    <td>
+                      <div class="form-check">
+                        <input class="form-check-input " type="checkbox" name="courseIds[]" value="{{this._id}}">
+                      </div>
+                    </td>
                     <td>{{this.name}}</td>
                     <td>{{this.title}}</td>
-                    <td>{{this.createdAt}}</td>
+                    <td>{{this.deletedAt}}</td>
                     <td>
                         <a href="" class="btn btn-link btn-restore" data-bs-id="{{this._id}}">Khôi phục</a>
                         <a href="" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-id="{{this._id}}">Xóa vĩnh viễn</a>
@@ -34,7 +54,7 @@
             <p style="text-align: center;">Thùng rác trống
             </p>
     {{/unless}}
-</div>
+</form>
 
 {{!-- MODAL --}}
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -146,5 +166,38 @@
       if(item.innerText == {{page}})
           item.closest(".page-item").classList.add("active")
      })
+
+
+     //HANDLE CHECKBOX COUNT COURSE
+     const checkboxAll = document.getElementById("checkbox-all")
+     const checkAllBtn = document.querySelector(".btn-submit-check-all")
+     const courseItemCheckbox = document.querySelectorAll("input[name='courseIds[]']")
+     //Check/uncheck all checkbox
+     checkboxAll.onchange = function(e) {
+      var isCheckedAll = e.target.checked
+      courseItemCheckbox.forEach(item => 
+        item.checked = isCheckedAll 
+      )
+      renderCheckAllSubmitBtn()
+     }
+
+     //Course Item checkbox change
+     courseItemCheckbox.forEach(item => {
+      item.addEventListener("change", function(e) {
+        var isCheckedAll = courseItemCheckbox.length === document.querySelectorAll("input[name='courseIds[]']:checked").length
+
+        checkboxAll.checked = isCheckedAll
+        renderCheckAllSubmitBtn()
+      })
+     })
+
+     //Re-render check all submit button
+     function renderCheckAllSubmitBtn(){
+        const checkedCount = document.querySelectorAll("input[name='courseIds[]']:checked").length
+        if(checkedCount > 0)
+          checkAllBtn.classList.remove("disabled")
+        else
+          checkAllBtn.classList.add("disabled")
+     }
 }
 </script>
